@@ -1,0 +1,33 @@
+PROJETO: FIAP-2CCPV-CP1-REFECTORY
+
+1. INSTALAR
+- Node.js LTS
+- Android Studio
+
+2. NO ANDROID STUDIO
+- Instalar SDK
+- Instalar Emulator
+- Criar um dispositivo virtual Android
+
+3. ABRIR O EMULADOR
+- Inicie o emulador pelo Android Studio
+
+4. ABRIR O POWERSHELL NA PASTA DO PROJETO
+cd "C:\Users\gabriel.simioni\Downloads\FIAP-2CCPV-CP1-REFECTORY"
+
+5. INSTALAR AS DEPENDÊNCIAS
+npm install
+
+6. RODAR O PROJETO
+npx expo start
+
+7. ABRIR NO EMULADOR
+- pressione a tecla a no terminal
+ou rode:
+npx expo start --android
+
+COMANDOS PRINCIPAIS
+
+cd "C:\Users\gabriel.simioni\Downloads\FIAP-2CCPV-CP1-REFECTORY"
+npm install
+npx expo start --android
