@@ -1,33 +1,27 @@
-PROJETO: FIAP-2CCPV-CP1-REFECTORY
-
-1. INSTALAR
+1. Pré-requisitos
 - Node.js LTS
-- Android Studio
+- Git
+- Android Studio (Emulador) ou dispositivo móvel com Expo Go.
 
-2. NO ANDROID STUDIO
-- Instalar SDK
-- Instalar Emulator
-- Criar um dispositivo virtual Android
+2. Instalação Local
+Abra o terminal e execute os comandos em ordem:
 
-3. ABRIR O EMULADOR
-- Inicie o emulador pelo Android Studio
+# Clone o repositório
+git clone https://github.com/GabrielSimioni12/Fiap-2CCPW-CP1-Refectory-app.git
 
-4. ABRIR O POWERSHELL NA PASTA DO PROJETO
-cd "C:\Users\gabriel.simioni\Downloads\FIAP-2CCPV-CP1-REFECTORY"
+# Acesse a pasta
+cd Fiap-2CCPW-CP1-Refectory-app
 
-5. INSTALAR AS DEPENDÊNCIAS
-npm install
+# Instalação das dependências (IMPORTANTE: Use esta flag para evitar erros de peer-deps)
+npm install --legacy-peer-deps
 
-6. RODAR O PROJETO
-npx expo start
+# Caso o erro de "react-dom" persista, force a instalação:
+npm install react-dom --legacy-peer-deps
 
-7. ABRIR NO EMULADOR
-- pressione a tecla a no terminal
-ou rode:
-npx expo start --android
+3. Execução
 
-COMANDOS PRINCIPAIS
+# Inicie o servidor Metro com limpeza de cache
+npx expo start -c
 
-cd "C:\Users\gabriel.simioni\Downloads\FIAP-2CCPV-CP1-REFECTORY"
-npm install
-npx expo start --android
+- Pressione a para abrir no emulador Android.
+- Escaneie o QR Code para abrir no celular físico.
