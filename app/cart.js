@@ -7,7 +7,8 @@ import { AppContext } from '../context/AppContext';
 import TabBar from '../components/TabBar';
 
 export default function Cart() {
-  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, user } = useContext(AppContext);
+  // Importamos a nova função addOrder
+  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, user, addOrder } = useContext(AppContext);
   const router = useRouter();
   const [selectedCantina, setSelectedCantina] = useState(null);
 
@@ -21,7 +22,6 @@ export default function Cart() {
     return acc;
   }, []);
 
-  // Lógica de Preço e Desconto
   const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
   const isProfessor = user?.perfil === 'professor';
   const desconto = isProfessor ? subtotal * 0.1 : 0;
@@ -32,11 +32,31 @@ export default function Cart() {
       Alert.alert('Atenção', 'Selecione uma cantina para retirar seu pedido.');
       return;
     }
+
+    // Estruturação do objeto do pedido para o histórico
+    const newOrder = {
+      id: Math.random().toString(36).substring(2, 9).toUpperCase(), // Gera um ID alfanumérico simples
+      date: new Date().toISOString(),
+      items: groupedCart,
+      subtotal: subtotal,
+      discount: desconto,
+      total: total,
+      location: selectedCantina
+    };
+
+    // Injeta o pedido no estado global ANTES de limpar o carrinho
+    addOrder(newOrder);
     
     Alert.alert(
       'Pedido Confirmado!',
       `Retirada na ${selectedCantina}\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
-      [{ text: 'OK', onPress: () => { clearCart(); router.push('/home'); } }]
+      [{ 
+        text: 'OK', 
+        onPress: () => { 
+          clearCart(); 
+          router.push('/home'); 
+        } 
+      }]
     );
   };
 
@@ -131,6 +151,7 @@ const styles = StyleSheet.create({
   cantinaOptActive: { backgroundColor: '#ED145B', borderColor: '#ED145B' },
   cantinaTextActive: { color: '#FFF' },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
+  priceLabel: { color: '#333' },
   discountLabel: { color: '#2ecc71', fontWeight: 'bold' },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, borderTopWidth: 1, borderTopColor: '#EEE', paddingTop: 10 },
   totalLabel: { fontSize: 18, fontWeight: 'bold' },

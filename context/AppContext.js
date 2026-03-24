@@ -5,6 +5,9 @@ export const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
+  
+  // Novo estado para armazenar o histórico de pedidos
+  const [orders, setOrders] = useState([]); 
 
   const login = (userData) => {
     setUser(userData);
@@ -13,6 +16,7 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setCart([]);
+    setOrders([]); // Purga o histórico de pedidos local ao encerrar a sessão
   };
 
   const addToCart = (item) => {
@@ -39,10 +43,16 @@ export const AppProvider = ({ children }) => {
     setCart([]);
   };
 
+  // Função para injetar um pedido finalizado no início do vetor
+  const addOrder = (orderData) => {
+    setOrders((prevOrders) => [orderData, ...prevOrders]);
+  };
+
   return (
     <AppContext.Provider value={{ 
       cart, addToCart, decreaseQuantity, removeFromCart, clearCart,
-      user, login, logout 
+      user, login, logout,
+      orders, addOrder // Expondo as novas estruturas para o restante do sistema
     }}>
       {children}
     </AppContext.Provider>
