@@ -45,7 +45,7 @@ export default function Login() {
           <Text style={styles.label}>Nome Completo</Text>
           <TextInput 
             style={styles.input} 
-            placeholder="Ex: Davi Xavier" 
+            placeholder="Ex: João" 
             value={nome}
             onChangeText={setNome}
           />
@@ -53,7 +53,7 @@ export default function Login() {
           <Text style={styles.label}>RM / Matrícula</Text>
           <TextInput 
             style={styles.input} 
-            placeholder="Ex: 98765" 
+            placeholder="Ex: 123456" 
             keyboardType="numeric"
             value={rm}
             onChangeText={setRm}

@@ -4,21 +4,17 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
-  
-  // Novo estado para gerenciar a sessão do usuário
   const [user, setUser] = useState(null);
 
-  // --- Funções de Autenticação ---
   const login = (userData) => {
     setUser(userData);
   };
 
   const logout = () => {
     setUser(null);
-    setCart([]); // Regra de negócio: limpa o carrinho por segurança ao sair
+    setCart([]);
   };
 
-  // --- Funções do Carrinho ---
   const addToCart = (item) => {
     setCart((prevCart) => [...prevCart, item]);
   };
@@ -46,7 +42,7 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{ 
       cart, addToCart, decreaseQuantity, removeFromCart, clearCart,
-      user, login, logout // Novas funções expostas para o app
+      user, login, logout 
     }}>
       {children}
     </AppContext.Provider>
