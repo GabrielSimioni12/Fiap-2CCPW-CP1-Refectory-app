@@ -1,85 +1,79 @@
 import React, { useContext } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ToastAndroid, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
 
 export default function ProductCard({ item }) {
   const { addToCart } = useContext(AppContext);
 
+  // Função encapsulada para adicionar ao carrinho e disparar o alerta
+  const handleAdd = () => {
+    addToCart(item);
+    
+    // Trava de segurança: O Toast nativo só existe no Android.
+    // Isso evita que o app quebre se você testar no navegador (Web).
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Adicionado ao carrinho!', ToastAndroid.SHORT);
+    }
+  };
+
   return (
     <View style={styles.card}>
-      <Image source={item.image} style={styles.image} resizeMode="cover" />
-      <View style={styles.infoContainer}>
+      <Image source={item.image} style={styles.image} />
+      
+      <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>
-            {/* Formatação nativa do JavaScript para Real Brasileiro */}
-            {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </Text>
-          <TouchableOpacity 
-            style={styles.addButton} 
-            onPress={() => addToCart(item)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="add" size={20} color="#FFF" />
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.price}>
+          {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+        </Text>
       </View>
+
+      {/* O botão agora chama a nossa função handleAdd */}
+      <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+        <Ionicons name="add" size={20} color="#FFF" />
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    width: 150,
     backgroundColor: '#FFF',
     borderRadius: 12,
+    padding: 10,
     marginRight: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, // Sombra nativa para Android
-    overflow: 'hidden',
+    width: 140,
+    elevation: 2, // Sombra para Android
     marginBottom: 10,
-    marginTop: 5,
   },
   image: {
     width: '100%',
     height: 100,
-    backgroundColor: '#F0F0F0', // Fallback enquanto a imagem carrega
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#F0F0F0', // Fundo caso a imagem demore a carregar
   },
-  infoContainer: {
-    padding: 12,
+  info: {
+    marginBottom: 10,
   },
   name: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: '#333',
     marginBottom: 4,
   },
-  description: {
-    fontSize: 11,
-    color: '#777',
-    marginBottom: 10,
-    height: 30, // Altura fixa para evitar quebra de alinhamento entre cards
-  },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   price: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 14,
     color: '#ED145B',
+    fontWeight: '900',
   },
   addButton: {
     backgroundColor: '#ED145B',
-    borderRadius: 20,
-    padding: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'flex-end',
   }
 });

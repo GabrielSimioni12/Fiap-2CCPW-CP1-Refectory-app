@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -11,8 +11,21 @@ export default function Settings() {
   const router = useRouter();
 
   const handleLogout = () => {
-    logout();
-    router.replace('/');
+    Alert.alert(
+      "Sair da Conta",
+      "Tem certeza que deseja encerrar a sessão?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sair", 
+          style: "destructive", 
+          onPress: () => {
+            logout();
+            router.replace('/');
+          } 
+        }
+      ]
+    );
   };
 
   // Função para formatar a data ISO em um padrão amigável brasileiro
