@@ -3,7 +3,7 @@ export const MENU_DATA = [
     title: "Salgados",
     data: [
       { id: "1", name: "Coxinha de Frango", price: 8.50, image: require('../assets/images/coxinha.png'), description: "Massa crocante e recheio cremoso" },
-      { id: "2", name: "Pão de Queijo", price: 6.00, image: require('../assets/images/coxinha.png'), description: "Tradicional, assado na hora" }, // Mantido fallback da coxinha por não haver pao_queijo.png
+      { id: "2", name: "Pão de Queijo", price: 6.00, image: require('../assets/images/pao_queijo.png'), description: "Tradicional, assado na hora" },
       { id: "3", name: "Esfiha de Carne", price: 7.50, image: require('../assets/images/esfirra.png'), description: "Massa leve e recheio temperado" },
       { id: "4", name: "Enroladinho de Salsicha", price: 7.00, image: require('../assets/images/enroladinho.png'), description: "Assado e macio" },
       { id: "5", name: "Kibe Frito", price: 8.50, image: require('../assets/images/kibe.png'), description: "Com hortelã e carne moída" },
@@ -13,7 +13,7 @@ export const MENU_DATA = [
     title: "Lanches Quentes",
     data: [
       { id: "6", name: "Hambúrguer Clássico", price: 18.50, image: require('../assets/images/hamburguer.png'), description: "Blend bovino, queijo e salada" },
-      { id: "7", name: "Misto Quente", price: 12.00, image: require('../assets/images/hamburguer.png'), description: "Pão de forma, presunto e queijo" }, // Fallback
+      { id: "7", name: "Misto Quente", price: 12.00, image: require('../assets/images/misto_quente.png'), description: "Pão de forma, presunto e queijo" },
       { id: "8", name: "Bauru", price: 14.00, image: require('../assets/images/bauru.png'), description: "Pão francês, rosbife, tomate e queijo" },
       { id: "9", name: "Sanduíche Natural", price: 15.00, image: require('../assets/images/sanduiche_natural.png'), description: "Pão integral, frango desfiado e cenoura" },
     ],
@@ -41,7 +41,7 @@ export const MENU_DATA = [
     data: [
       { id: "18", name: "Suco de Laranja 500ml", price: 10.00, image: require('../assets/images/sucos.png'), description: "Natural, feito na hora" },
       { id: "19", name: "Suco de Uva Integral", price: 12.00, image: require('../assets/images/suco_uva.png'), description: "Garrafa 300ml" },
-      { id: "20", name: "Refrigerante Lata", price: 7.50, image: require('../assets/images/sucos.png'), description: "Cola, Guaraná ou Laranja" }, // Fallback
+      { id: "20", name: "Refrigerante Lata", price: 7.50, image: require('../assets/images/refrigerante.png'), description: "Cola, Guaraná ou Laranja" },
       { id: "21", name: "Água Mineral Sem Gás", price: 4.00, image: require('../assets/images/agua.png'), description: "Garrafa 500ml" },
       { id: "22", name: "Nescau Prontinho", price: 6.50, image: require('../assets/images/nescau.png'), description: "Caixinha 200ml" },
       { id: "23", name: "Energético", price: 15.00, image: require('../assets/images/energetico.png'), description: "Lata 250ml" },
@@ -50,7 +50,7 @@ export const MENU_DATA = [
   {
     title: "Bebidas Quentes",
     data: [
-      { id: "24", name: "Café Expresso", price: 5.00, image: require('../assets/images/cafe_leite.png'), description: "Grãos selecionados" }, // Fallback
+      { id: "24", name: "Café Expresso", price: 5.00, image: require('../assets/images/cafe_expresso.png'), description: "Grãos selecionados" },
       { id: "25", name: "Café com Leite", price: 6.50, image: require('../assets/images/cafe_leite.png'), description: "Copo médio" },
       { id: "26", name: "Cappuccino", price: 8.50, image: require('../assets/images/cappuccino.png'), description: "Com toque de canela e chocolate" },
     ],
