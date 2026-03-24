@@ -4,13 +4,25 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  
+  // Novo estado para gerenciar a sessão do usuário
+  const [user, setUser] = useState(null);
 
-  // Adiciona um item ao carrinho
+  // --- Funções de Autenticação ---
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  const logout = () => {
+    setUser(null);
+    setCart([]); // Regra de negócio: limpa o carrinho por segurança ao sair
+  };
+
+  // --- Funções do Carrinho ---
   const addToCart = (item) => {
     setCart((prevCart) => [...prevCart, item]);
   };
 
-  // Remove apenas UMA unidade do item (encontra o primeiro índice e corta)
   const decreaseQuantity = (id) => {
     setCart((prevCart) => {
       const index = prevCart.findIndex(item => item.id === id);
@@ -23,18 +35,19 @@ export const AppProvider = ({ children }) => {
     });
   };
 
-  // Remove TODAS as unidades do item selecionado (filtra fora do array)
   const removeFromCart = (id) => {
     setCart((prevCart) => prevCart.filter(item => item.id !== id));
   };
 
-  // Esvazia o carrinho completamente
   const clearCart = () => {
     setCart([]);
   };
 
   return (
-    <AppContext.Provider value={{ cart, addToCart, decreaseQuantity, removeFromCart, clearCart }}>
+    <AppContext.Provider value={{ 
+      cart, addToCart, decreaseQuantity, removeFromCart, clearCart,
+      user, login, logout // Novas funções expostas para o app
+    }}>
       {children}
     </AppContext.Provider>
   );

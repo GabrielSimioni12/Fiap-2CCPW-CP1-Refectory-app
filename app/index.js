@@ -1,113 +1,120 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, SafeAreaView, Text, Image, FlatList } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
+import { AppContext } from '../context/AppContext';
+import { Ionicons } from '@expo/vector-icons';
 
-import { MENU_DATA, CANTINAS } from '../data/menuData';
-import ProductCard from '../components/ProductCard';
-import OccupancyCard from '../components/OccupancyCard';
-import TabBar from '../components/TabBar';
+export default function Login() {
+  const [nome, setNome] = useState('');
+  const [rm, setRm] = useState('');
+  const [curso, setCurso] = useState('');
+  const [perfil, setPerfil] = useState('aluno'); // Padrão é aluno
+  
+  const { login } = useContext(AppContext);
+  const router = useRouter();
 
-export default function Home() {
-  const [cantinasStatus, setCantinasStatus] = useState(CANTINAS);
+  const handleLogin = () => {
+    // Validação básica
+    if (!nome.trim() || !rm.trim() || !curso.trim()) {
+      Alert.alert('Campos Obrigatórios', 'Por favor, preencha seu Nome, RM/Matrícula e Curso para continuar.');
+      return;
+    }
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCantinasStatus(prevStatus => prevStatus.map(cantina => {
-        const variacao = Math.floor(Math.random() * 11) - 5; 
-        let novaOcupacao = cantina.ocupacao + variacao;
-        
-        if (novaOcupacao > 100) novaOcupacao = 100;
-        if (novaOcupacao < 0) novaOcupacao = 0;
-        
-        let novoStatus = cantina.statusDetalhado;
-        let novoTempo = cantina.tempoEspera;
-        
-        if (novaOcupacao > 75) {
-          novoStatus = "Pico de movimento. Fila extensa.";
-          novoTempo = "15-20 min";
-        } else if (novaOcupacao > 40) {
-          novoStatus = "Movimento moderado. Fila aceitável.";
-          novoTempo = "8-12 min";
-        } else {
-          novoStatus = "Movimento tranquilo. Retirada rápida.";
-          novoTempo = "3-5 min";
-        }
+    // Registra a sessão no Contexto Global
+    login({ nome, rm, curso, perfil });
 
-        return { ...cantina, ocupacao: novaOcupacao, statusDetalhado: novoStatus, tempoEspera: novoTempo };
-      }));
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
+    // Navega para o cardápio, substituindo a rota atual para não permitir "voltar" pro login
+    router.replace('/home');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Cantina FIAP</Text>
-        </View>
-        <Image 
-          source={require('../assets/images/cantina.png')} 
-          style={styles.bannerImage} 
-        />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Status das Unidades</Text>
-          <View style={styles.occupancyContainer}>
-            {cantinasStatus.map(c => (
-              <View key={c.id} style={styles.occupancyWrapper}>
-                {/* O componente agora recebe todas as propriedades necessárias */}
-                <OccupancyCard 
-                  nome={c.nome} 
-                  ocupacao={c.ocupacao} 
-                  tempoEspera={c.tempoEspera}
-                  statusDetalhado={c.statusDetalhado}
-                />
-              </View>
-            ))}
-          </View>
+      <StatusBar style="dark" />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.content}
+      >
+        <View style={styles.logoContainer}>
+          <Ionicons name="fast-food" size={80} color="#ED145B" />
+          <Text style={styles.appTitle}>Cantina FIAP</Text>
+          <Text style={styles.appSubtitle}>Faça login para fazer seu pedido</Text>
         </View>
 
-        {MENU_DATA.map((section, index) => (
-          <View key={index} style={styles.section}>
-            <Text style={styles.categoryTitle}>{section.title}</Text>
-            <FlatList
-              data={section.data}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => <ProductCard item={item} />}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </View>
-        ))}
-        
-      </ScrollView>
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>Nome Completo</Text>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Ex: Davi Xavier" 
+            value={nome}
+            onChangeText={setNome}
+          />
 
-      <TabBar />
+          <Text style={styles.label}>RM / Matrícula</Text>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Ex: 98765" 
+            keyboardType="numeric"
+            value={rm}
+            onChangeText={setRm}
+          />
+
+          <Text style={styles.label}>Curso / Departamento</Text>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Ex: Ciência da Computação" 
+            value={curso}
+            onChangeText={setCurso}
+          />
+
+          <Text style={styles.label}>Você é:</Text>
+          <View style={styles.roleSelector}>
+            <TouchableOpacity 
+              style={[styles.roleOption, perfil === 'aluno' && styles.roleOptionActive]}
+              onPress={() => setPerfil('aluno')}
+            >
+              <Ionicons name="school-outline" size={20} color={perfil === 'aluno' ? "#FFF" : "#666"} />
+              <Text style={[styles.roleText, perfil === 'aluno' && styles.roleTextActive]}>Aluno</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.roleOption, perfil === 'professor' && styles.roleOptionActive]}
+              onPress={() => setPerfil('professor')}
+            >
+              <Ionicons name="briefcase-outline" size={20} color={perfil === 'professor' ? "#FFF" : "#666"} />
+              <Text style={[styles.roleText, perfil === 'professor' && styles.roleTextActive]}>Professor</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {perfil === 'professor' && (
+            <Text style={styles.discountBadge}>✨ Professores têm 10% de desconto!</Text>
+          )}
+
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Acessar Cardápio</Text>
+            <Ionicons name="arrow-forward" size={20} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA' },
-  header: { 
-    backgroundColor: '#ED145B', 
-    height: 90, 
-    justifyContent: 'flex-end', 
-    alignItems: 'center',
-    paddingBottom: 15,
-  },
-  headerTitle: { color: '#FFF', fontSize: 20, fontWeight: '800', letterSpacing: 0.5 },
-  bannerImage: { width: '100%', height: 140, backgroundColor: '#DDD' },
-  scrollContent: { paddingBottom: 100 },
-  section: { marginTop: 25, paddingHorizontal: 15 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#555', marginBottom: 15, textTransform: 'uppercase' },
-  occupancyContainer: { flexDirection: 'row', justifyContent: 'space-between' },
-  occupancyWrapper: { width: '48%' },
-  categoryTitle: { fontSize: 22, fontWeight: '800', color: '#333', marginBottom: 15 },
-  horizontalList: { paddingRight: 15 }
+  content: { flex: 1, justifyContent: 'center', padding: 25 },
+  logoContainer: { alignItems: 'center', marginBottom: 40 },
+  appTitle: { fontSize: 28, fontWeight: '900', color: '#333', marginTop: 10, letterSpacing: -0.5 },
+  appSubtitle: { fontSize: 14, color: '#777', marginTop: 5 },
+  formContainer: { backgroundColor: '#FFF', padding: 20, borderRadius: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, borderWidth: 1, borderColor: '#EEE' },
+  label: { fontSize: 13, fontWeight: '700', color: '#555', marginBottom: 8, textTransform: 'uppercase' },
+  input: { backgroundColor: '#F5F5F5', borderRadius: 8, paddingHorizontal: 15, height: 50, fontSize: 16, color: '#333', marginBottom: 20, borderWidth: 1, borderColor: '#EAEAEA' },
+  roleSelector: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+  roleOption: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderWidth: 1, borderColor: '#DDD', borderRadius: 8, marginHorizontal: 4 },
+  roleOptionActive: { backgroundColor: '#ED145B', borderColor: '#ED145B' },
+  roleText: { fontSize: 15, fontWeight: '600', color: '#666', marginLeft: 8 },
+  roleTextActive: { color: '#FFF' },
+  discountBadge: { textAlign: 'center', color: '#2ecc71', fontWeight: 'bold', fontSize: 13, marginBottom: 15 },
+  loginButton: { backgroundColor: '#ED145B', height: 55, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10 },
+  loginButtonText: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginRight: 10 },
 });
