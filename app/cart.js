@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -7,11 +7,11 @@ import { AppContext } from '../context/AppContext';
 import TabBar from '../components/TabBar';
 
 export default function Cart() {
-  const { cart } = useContext(AppContext);
+  // Importando todas as funções de gerenciamento
+  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart } = useContext(AppContext);
   const router = useRouter();
   const [selectedCantina, setSelectedCantina] = useState(null);
 
-  // Lógica para agrupar itens repetidos e somar quantidades
   const groupedCart = cart.reduce((acc, item) => {
     const existingItem = acc.find(i => i.id === item.id);
     if (existingItem) {
@@ -22,28 +22,58 @@ export default function Cart() {
     return acc;
   }, []);
 
-  // Cálculo do valor total
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   const handleCheckout = () => {
     if (!selectedCantina) {
-      alert('Por favor, selecione uma cantina para retirar seu pedido.');
+      Alert.alert('Atenção', 'Por favor, selecione uma cantina para retirar seu pedido.');
       return;
     }
-    alert(`Pedido confirmado para retirada na ${selectedCantina}!\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`);
+    
+    // Alerta de sucesso, limpando o carrinho e voltando para a Home
+    Alert.alert(
+      'Pedido Confirmado!',
+      `Retirada na ${selectedCantina}\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+      [
+        { 
+          text: 'OK', 
+          onPress: () => {
+            clearCart();
+            router.push('/');
+          } 
+        }
+      ]
+    );
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.cartItem}>
       <Image source={item.image} style={styles.itemImage} resizeMode="cover" />
+      
       <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
         <Text style={styles.itemPrice}>
           {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </Text>
       </View>
-      <View style={styles.quantityBox}>
-        <Text style={styles.quantityText}>x{item.quantity}</Text>
+
+      {/* Controles de Quantidade Modulares */}
+      <View style={styles.quantityControls}>
+        {item.quantity === 1 ? (
+          <TouchableOpacity style={styles.controlButtonTrash} onPress={() => removeFromCart(item.id)}>
+            <Ionicons name="trash-outline" size={16} color="#ED145B" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.controlButton} onPress={() => decreaseQuantity(item.id)}>
+            <Ionicons name="remove" size={16} color="#ED145B" />
+          </TouchableOpacity>
+        )}
+        
+        <Text style={styles.quantityText}>{item.quantity}</Text>
+        
+        <TouchableOpacity style={styles.controlButton} onPress={() => addToCart(item)}>
+          <Ionicons name="add" size={16} color="#ED145B" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -54,9 +84,14 @@ export default function Cart() {
       
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Meu Carrinho</Text>
+        {/* Botão de esvaziar carrinho no cabeçalho */}
+        {cart.length > 0 && (
+          <TouchableOpacity style={styles.clearHeaderButton} onPress={clearCart}>
+             <Ionicons name="trash-bin-outline" size={22} color="#FFF" />
+          </TouchableOpacity>
+        )}
       </View>
 
-      {/* Renderização Condicional: Carrinho Vazio vs Com Itens */}
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="cart-outline" size={80} color="#DDD" />
@@ -72,6 +107,7 @@ export default function Cart() {
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
           />
           
           <View style={styles.checkoutSection}>
@@ -112,8 +148,9 @@ export default function Cart() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA' },
-  header: { backgroundColor: '#ED145B', height: 90, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 15 },
+  header: { backgroundColor: '#ED145B', height: 90, flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end', paddingBottom: 15, position: 'relative' },
   headerTitle: { color: '#FFF', fontSize: 20, fontWeight: '800' },
+  clearHeaderButton: { position: 'absolute', right: 20, bottom: 15 },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyText: { fontSize: 18, color: '#999', marginTop: 15, marginBottom: 25 },
   returnButton: { backgroundColor: '#ED145B', paddingHorizontal: 25, paddingVertical: 12, borderRadius: 25 },
@@ -121,11 +158,13 @@ const styles = StyleSheet.create({
   listContent: { padding: 15, paddingBottom: 20 },
   cartItem: { flexDirection: 'row', backgroundColor: '#FFF', borderRadius: 12, padding: 10, marginBottom: 15, alignItems: 'center', elevation: 2 },
   itemImage: { width: 60, height: 60, borderRadius: 8, backgroundColor: '#EEE' },
-  itemInfo: { flex: 1, marginLeft: 15 },
-  itemName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  itemPrice: { fontSize: 15, color: '#ED145B', marginTop: 5, fontWeight: '600' },
-  quantityBox: { backgroundColor: '#F0F0F0', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  quantityText: { fontSize: 14, fontWeight: 'bold', color: '#555' },
+  itemInfo: { flex: 1, marginLeft: 12, marginRight: 5 },
+  itemName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
+  itemPrice: { fontSize: 14, color: '#ED145B', marginTop: 4, fontWeight: '600' },
+  quantityControls: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F8F8', borderRadius: 20, padding: 4, borderWidth: 1, borderColor: '#EEE' },
+  controlButton: { width: 28, height: 28, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 14, elevation: 1 },
+  controlButtonTrash: { width: 28, height: 28, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF0F5', borderRadius: 14, elevation: 1 },
+  quantityText: { width: 25, textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: '#333' },
   checkoutSection: { backgroundColor: '#FFF', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, elevation: 15, paddingBottom: 110 },
   sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#555', marginBottom: 10, textTransform: 'uppercase' },
   cantinaSelector: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },

@@ -4,20 +4,37 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Função para adicionar itens ao carrinho
+  // Adiciona um item ao carrinho
   const addToCart = (item) => {
     setCart((prevCart) => [...prevCart, item]);
   };
 
-  // Função para alternar o tema
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+  // Remove apenas UMA unidade do item (encontra o primeiro índice e corta)
+  const decreaseQuantity = (id) => {
+    setCart((prevCart) => {
+      const index = prevCart.findIndex(item => item.id === id);
+      if (index !== -1) {
+        const newCart = [...prevCart];
+        newCart.splice(index, 1);
+        return newCart;
+      }
+      return prevCart;
+    });
+  };
+
+  // Remove TODAS as unidades do item selecionado (filtra fora do array)
+  const removeFromCart = (id) => {
+    setCart((prevCart) => prevCart.filter(item => item.id !== id));
+  };
+
+  // Esvazia o carrinho completamente
+  const clearCart = () => {
+    setCart([]);
   };
 
   return (
-    <AppContext.Provider value={{ cart, addToCart, isDarkMode, toggleTheme }}>
+    <AppContext.Provider value={{ cart, addToCart, decreaseQuantity, removeFromCart, clearCart }}>
       {children}
     </AppContext.Provider>
   );
