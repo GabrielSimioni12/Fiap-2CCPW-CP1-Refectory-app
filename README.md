@@ -1,6 +1,19 @@
 # 🍔 Cantina FIAP - Refectory App (CP1)
 
-Aplicativo mobile desenvolvido em **React Native com Expo** para o gerenciamento de pedidos e filas nas cantinas da FIAP. Etregando uma experiência de usuário fluida e regras de negócio funcionais.
+Aplicativo mobile desenvolvido em **React Native com Expo** para o gerenciamento de pedidos e filas nas cantinas da FIAP. Entregando uma experiência de usuário fluida e regras de negócio funcionais.
+
+## 📱 Telas do Aplicativo
+
+<p align="center">
+  <img src="./assets/screenshots/login.png" width="30%" />
+  <img src="./assets/screenshots/home.png" width="30%" />
+  <img src="./assets/screenshots/menu.png" width="30%" />
+</p>
+<p align="center">
+  <img src="./assets/screenshots/carrinho.png" width="30%" />
+  <img src="./assets/screenshots/confirmacao.png" width="30%" />
+  <img src="./assets/screenshots/perfil.png" width="30%" />
+</p>
 
 ## 🚀 Funcionalidades Implementadas
 
@@ -20,12 +33,16 @@ Aplicativo mobile desenvolvido em **React Native com Expo** para o gerenciamento
 - Async Storage (Persistência)
 - Expo Vector Icons (Ionicons)
 
-## 📱 Como Executar o Projeto
+## 💻 Como Executar o Projeto
 
 1. Clone o repositório ou extraia os arquivos.
 2. Abra o terminal na pasta raiz do projeto.
 3. Instale as dependências executando:
-   ```bash
    npm install --legacy-peer-deps
+4. Inicie com: 
+  npx expo start -c
 
-   
+## 👥 Integrantes
+
+* **Davi Xavier** - RM: 563572
+* **Gabriel Simioni** - RM: 563475
