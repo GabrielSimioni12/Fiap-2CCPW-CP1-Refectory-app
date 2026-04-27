@@ -7,15 +7,19 @@ export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado para evitar flash de tela de login
+  const [registeredUsers, setRegisteredUsers] = useState([]); // Lista de usuários cadastrados
+  const [loading, setLoading] = useState(true);
 
   // 1. CARREGAR DADOS AO INICIAR O APP
   useEffect(() => {
     const loadStorageData = async () => {
       try {
+        // Carrega usuários registrados, usuário logado e histórico de pedidos
+        const storedRegistered = await AsyncStorage.getItem('@fiap_registered_users');
         const storedUser = await AsyncStorage.getItem('@fiap_user');
         const storedOrders = await AsyncStorage.getItem('@fiap_orders');
 
+        if (storedRegistered) setRegisteredUsers(JSON.parse(storedRegistered));
         if (storedUser) setUser(JSON.parse(storedUser));
         if (storedOrders) setOrders(JSON.parse(storedOrders));
       } catch (e) {
@@ -27,13 +31,14 @@ export const AppProvider = ({ children }) => {
     loadStorageData();
   }, []);
 
-  // 2. SALVAR DADOS AUTOMATICAMENTE QUANDO MUDAR O USER
+  // 2. SALVAR USUÁRIO LOGADO AUTOMATICAMENTE
   useEffect(() => {
     const saveUser = async () => {
       try {
         if (user) {
           await AsyncStorage.setItem('@fiap_user', JSON.stringify(user));
         } else {
+          // No logout, removemos apenas o usuário logado, não os cadastrados
           await AsyncStorage.removeItem('@fiap_user');
         }
       } catch (e) { console.error(e); }
@@ -41,7 +46,7 @@ export const AppProvider = ({ children }) => {
     saveUser();
   }, [user]);
 
-  // 3. SALVAR PEDIDOS AUTOMATICAMENTE QUANDO MUDAR O HISTÓRICO
+  // 3. SALVAR PEDIDOS AUTOMATICAMENTE
   useEffect(() => {
     const saveOrders = async () => {
       try {
@@ -51,16 +56,33 @@ export const AppProvider = ({ children }) => {
     saveOrders();
   }, [orders]);
 
-  const login = (userData) => setUser(userData);
+  // --- FUNÇÕES DE AUTENTICAÇÃO ---
 
-  const logout = async () => {
+  const register = async (newUser) => {
+    try {
+      // Verifica se o e-mail já existe
+      const userExists = registeredUsers.find(u => u.email === newUser.email);
+      if (userExists) return { success: false, message: 'Este e-mail já está cadastrado.' };
+
+      const updatedUsers = [...registeredUsers, newUser];
+      setRegisteredUsers(updatedUsers);
+      await AsyncStorage.setItem('@fiap_registered_users', JSON.stringify(updatedUsers));
+      return { success: true };
+    } catch (e) {
+      return { success: false, message: 'Erro ao salvar cadastro.' };
+    }
+  };
+
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  const logout = () => {
     setUser(null);
     setCart([]);
-    setOrders([]);
-    try {
-      await AsyncStorage.clear(); // Limpa tudo no logout por segurança
-    } catch (e) { console.error(e); }
   };
+
+  // --- FUNÇÕES DO CARRINHO ---
 
   const addToCart = (item) => setCart((prev) => [...prev, item]);
 
@@ -77,15 +99,18 @@ export const AppProvider = ({ children }) => {
   };
 
   const removeFromCart = (id) => setCart((prev) => prev.filter(item => item.id !== id));
+  
   const clearCart = () => setCart([]);
-  const addOrder = (orderData) => setOrders((prev) => [orderData, ...prev]);
+
+  const addOrder = (newOrder) => {
+    setOrders((prev) => [newOrder, ...prev]);
+  };
 
   return (
     <AppContext.Provider value={{ 
-      cart, addToCart, decreaseQuantity, removeFromCart, clearCart,
-      user, login, logout,
-      orders, addOrder,
-      loading // Expondo o loading para o Layout se necessário
+      cart, user, orders, registeredUsers, loading,
+      login, logout, register, 
+      addToCart, decreaseQuantity, removeFromCart, clearCart, addOrder 
     }}>
       {children}
     </AppContext.Provider>

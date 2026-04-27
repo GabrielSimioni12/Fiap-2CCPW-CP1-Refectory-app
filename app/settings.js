@@ -85,9 +85,8 @@ export default function Settings() {
               </View>
               <View style={styles.info}>
                 <Text style={styles.name}>{user?.nome || 'Usuário'}</Text>
-                <Text style={styles.subText}>RM: {user?.rm || '---'}</Text>
-                <Text style={styles.subText}>{user?.curso || '---'}</Text>
-                <View style={[styles.badge, { backgroundColor: user?.perfil === 'professor' ? '#2ecc71' : '#ED145B' }]}>
+                <Text style={styles.subText}>{user?.email || 'Sem e-mail cadastrado'}</Text>
+                <View style={[styles.badge, { backgroundColor: user?.perfil === 'professor' ? '#2ecc71' : '#ED145B', marginTop: 8 }]}>
                   <Text style={styles.badgeText}>{user?.perfil?.toUpperCase() || 'ALUNO'}</Text>
                 </View>
               </View>
