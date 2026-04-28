@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Alert, ToastAndroid, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -7,7 +7,7 @@ import { AppContext } from '../context/AppContext';
 import TabBar from '../components/TabBar';
 
 export default function Settings() {
-  const { user, logout, orders } = useContext(AppContext);
+  const { user, logout, orders, addToCart } = useContext(AppContext);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -28,13 +28,29 @@ export default function Settings() {
     );
   };
 
-  // Função para formatar a data ISO em um padrão amigável brasileiro
+  // NOVA FUNÇÃO: Repetir Pedido
+  const handleReorder = (orderItems) => {
+    // Adiciona cada item do pedido antigo de volta ao carrinho
+    orderItems.forEach(orderItem => {
+      // Como o orderItem tem uma propriedade 'quantity', fazemos um loop para adicionar a quantidade certa
+      for (let i = 0; i < orderItem.quantity; i++) {
+        addToCart(orderItem);
+      }
+    });
+
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Itens adicionados ao carrinho!', ToastAndroid.SHORT);
+    }
+    
+    // Leva o usuário direto para o carrinho
+    router.push('/cart');
+  };
+
   const formatDate = (dateString) => {
     const options = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString('pt-BR', options).replace(',', ' às');
   };
 
-  // Componente visual de cada pedido na lista
   const renderOrderItem = ({ item }) => (
     <View style={styles.orderCard}>
       <View style={styles.orderHeader}>
@@ -56,10 +72,21 @@ export default function Settings() {
       </View>
 
       <View style={styles.orderFooter}>
-        <Text style={styles.orderTotalLabel}>Total Pago:</Text>
-        <Text style={styles.orderTotalValue}>
-          {item.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-        </Text>
+        <View>
+          <Text style={styles.orderTotalLabel}>Total Pago:</Text>
+          <Text style={styles.orderTotalValue}>
+            {item.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </Text>
+        </View>
+        
+        {/* NOVO BOTÃO DE REORDER */}
+        <TouchableOpacity 
+          style={styles.reorderBtn} 
+          onPress={() => handleReorder(item.items)}
+        >
+          <Ionicons name="reload-outline" size={16} color="#FFF" />
+          <Text style={styles.reorderText}>Pedir de Novo</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -76,7 +103,6 @@ export default function Settings() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        // O Header da lista contém o card de perfil
         ListHeaderComponent={
           <>
             <View style={styles.profileCard}>
@@ -106,7 +132,6 @@ export default function Settings() {
           </>
         }
         renderItem={renderOrderItem}
-        // O Footer da lista contém o botão de Sair
         ListFooterComponent={
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color="#FFF" />
@@ -148,6 +173,11 @@ const styles = StyleSheet.create({
   orderFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8F9FA', padding: 10, borderRadius: 8 },
   orderTotalLabel: { fontSize: 13, fontWeight: 'bold', color: '#666' },
   orderTotalValue: { fontSize: 16, fontWeight: '900', color: '#ED145B' },
+  
+  // Estilo do novo botão
+  reorderBtn: { backgroundColor: '#2ecc71', flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 },
+  reorderText: { color: '#FFF', fontWeight: 'bold', fontSize: 12, marginLeft: 5 },
+  
   logoutBtn: { backgroundColor: '#ED145B', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 15, borderRadius: 10, marginTop: 15, elevation: 2 },
   logoutText: { color: '#FFF', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }
 });
