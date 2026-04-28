@@ -61,7 +61,7 @@ export default function Login() {
           <View style={styles.logoContainer}>
             <Ionicons name="fast-food" size={80} color="#ED145B" />
             <Text style={styles.appTitle}>Cantina FIAP</Text>
-            <Text style={styles.appSubtitle}>Checkpoint 2 - Login Real</Text>
+            <Text style={styles.appSubtitle}>Checkpoint 2</Text>
           </View>
 
           <View style={styles.formContainer}>
