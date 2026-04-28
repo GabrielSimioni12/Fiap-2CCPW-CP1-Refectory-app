@@ -4,14 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
 
 export default function ProductCard({ item }) {
-  const { addToCart } = useContext(AppContext);
+  const { addToCart, favorites, toggleFavorite } = useContext(AppContext);
 
-  // Função encapsulada para adicionar ao carrinho e disparar o alerta
+  // Verifica se o item atual está na lista de favoritos
+  const isFavorite = favorites.some(f => f.id === item.id);
+
   const handleAdd = () => {
     addToCart(item);
-    
-    // Trava de segurança: O Toast nativo só existe no Android.
-    // Isso evita que o app quebre se você testar no navegador (Web).
     if (Platform.OS === 'android') {
       ToastAndroid.show('Adicionado ao carrinho!', ToastAndroid.SHORT);
     }
@@ -19,7 +18,20 @@ export default function ProductCard({ item }) {
 
   return (
     <View style={styles.card}>
-      <Image source={item.image} style={styles.image} />
+      {/* Botão de Favoritar sobre a Imagem */}
+      <View style={styles.imageContainer}>
+        <Image source={item.image} style={styles.image} />
+        <TouchableOpacity 
+          style={styles.favoriteBtn} 
+          onPress={() => toggleFavorite(item)}
+        >
+          <Ionicons 
+            name={isFavorite ? "heart" : "heart-outline"} 
+            size={22} 
+            color={isFavorite ? "#ED145B" : "#FFF"} 
+          />
+        </TouchableOpacity>
+      </View>
       
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
@@ -28,7 +40,6 @@ export default function ProductCard({ item }) {
         </Text>
       </View>
 
-      {/* O botão agora chama a nossa função handleAdd */}
       <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
         <Ionicons name="add" size={20} color="#FFF" />
       </TouchableOpacity>
@@ -43,15 +54,26 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 15,
     width: 140,
-    elevation: 2, // Sombra para Android
+    elevation: 2, 
+    marginBottom: 10,
+  },
+  imageContainer: {
+    position: 'relative',
     marginBottom: 10,
   },
   image: {
     width: '100%',
     height: 100,
     borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: '#F0F0F0', // Fundo caso a imagem demore a carregar
+    backgroundColor: '#F0F0F0',
+  },
+  favoriteBtn: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 15,
+    padding: 4,
   },
   info: {
     marginBottom: 10,

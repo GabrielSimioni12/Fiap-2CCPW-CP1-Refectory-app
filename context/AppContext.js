@@ -8,7 +8,8 @@ export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [registeredUsers, setRegisteredUsers] = useState([]);
-  const [xp, setXp] = useState(0); // Estado de XP persistente
+  const [xp, setXp] = useState(0); 
+  const [favorites, setFavorites] = useState([]); // NOVO: Estado de Favoritos
   const [loading, setLoading] = useState(true);
 
   // 1. CARREGAR DADOS AO INICIAR O APP
@@ -19,11 +20,13 @@ export const AppProvider = ({ children }) => {
         const storedUser = await AsyncStorage.getItem('@fiap_user');
         const storedOrders = await AsyncStorage.getItem('@fiap_orders');
         const storedXp = await AsyncStorage.getItem('@fiap_xp');
+        const storedFavs = await AsyncStorage.getItem('@fiap_favorites'); // Carrega Favoritos
 
         if (storedRegistered) setRegisteredUsers(JSON.parse(storedRegistered));
         if (storedUser) setUser(JSON.parse(storedUser));
         if (storedOrders) setOrders(JSON.parse(storedOrders));
         if (storedXp) setXp(parseInt(storedXp) || 0);
+        if (storedFavs) setFavorites(JSON.parse(storedFavs));
       } catch (e) {
         console.error("Erro ao carregar dados do storage", e);
       } finally {
@@ -33,7 +36,7 @@ export const AppProvider = ({ children }) => {
     loadStorageData();
   }, []);
 
-  // 2. SALVAR USUÁRIO LOGADO AUTOMATICAMENTE
+  // 2. SALVAR DADOS AUTOMATICAMENTE
   useEffect(() => {
     const saveUser = async () => {
       try {
@@ -44,7 +47,6 @@ export const AppProvider = ({ children }) => {
     saveUser();
   }, [user]);
 
-  // 3. SALVAR PEDIDOS AUTOMATICAMENTE
   useEffect(() => {
     const saveOrders = async () => {
       try { await AsyncStorage.setItem('@fiap_orders', JSON.stringify(orders)); } 
@@ -53,7 +55,6 @@ export const AppProvider = ({ children }) => {
     saveOrders();
   }, [orders]);
 
-  // 4. SALVAR XP AUTOMATICAMENTE
   useEffect(() => {
     const saveXp = async () => {
       try { await AsyncStorage.setItem('@fiap_xp', xp.toString()); } 
@@ -62,8 +63,25 @@ export const AppProvider = ({ children }) => {
     saveXp();
   }, [xp]);
 
-  // --- LÓGICA DE GAMIFICAÇÃO ---
+  // NOVO: SALVAR FAVORITOS AUTOMATICAMENTE
+  useEffect(() => {
+    const saveFavs = async () => {
+      try { await AsyncStorage.setItem('@fiap_favorites', JSON.stringify(favorites)); } 
+      catch (e) { console.error(e); }
+    };
+    saveFavs();
+  }, [favorites]);
+
+  // --- LÓGICA DE GAMIFICAÇÃO E FAVORITOS ---
   const addXp = (amount) => setXp(prev => prev + Math.floor(amount * 10));
+
+  const toggleFavorite = (item) => {
+    setFavorites(prev => {
+      const isFav = prev.find(f => f.id === item.id);
+      if (isFav) return prev.filter(f => f.id !== item.id); // Remove se já existe
+      return [...prev, item]; // Adiciona se não existe
+    });
+  };
 
   // --- FUNÇÕES DE AUTENTICAÇÃO ---
   const register = async (newUser) => {
@@ -102,8 +120,8 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{ 
-      cart, user, orders, registeredUsers, loading, xp,
-      login, logout, register, addXp,
+      cart, user, orders, registeredUsers, loading, xp, favorites,
+      login, logout, register, addXp, toggleFavorite,
       addToCart, decreaseQuantity, removeFromCart, clearCart, addOrder 
     }}>
       {children}
