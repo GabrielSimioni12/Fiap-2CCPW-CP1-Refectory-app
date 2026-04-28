@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, View, ScrollView, SafeAreaView, Text, Image, FlatList } from 'react-native';
+import { StyleSheet, View, ScrollView, SafeAreaView, Text, Image, FlatList, TextInput, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router'; // Importar o roteador
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import { MENU_DATA, CANTINAS } from '../data/menuData';
-import { AppContext } from '../context/AppContext'; // Importar o contexto
+import { AppContext } from '../context/AppContext';
 import ProductCard from '../components/ProductCard';
 import OccupancyCard from '../components/OccupancyCard';
 import TabBar from '../components/TabBar';
@@ -13,8 +14,11 @@ export default function Home() {
   const { user } = useContext(AppContext);
   const router = useRouter();
   const [cantinasStatus, setCantinasStatus] = useState(CANTINAS);
+  
+  // 1. Criamos o estado para armazenar o texto da busca
+  const [search, setSearch] = useState('');
 
-  // LOGICA DE PROTEÇÃO: Se não houver usuário logado, expulsa para o Login
+  // Lógica de Proteção
   useEffect(() => {
     if (!user) {
       router.replace('/');
@@ -46,7 +50,14 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Se o user for null, não renderiza nada enquanto o useEffect faz o redirect
+  // 2. Lógica de Filtragem do Menu em tempo real
+  const filteredMenu = MENU_DATA.map(section => ({
+    ...section,
+    data: section.data.filter(item => 
+      item.name.toLowerCase().includes(search.toLowerCase())
+    )
+  })).filter(section => section.data.length > 0);
+
   if (!user) return null;
 
   return (
@@ -60,40 +71,68 @@ export default function Home() {
           <Text style={styles.welcomeText}>Olá, {user.nome.split(' ')[0]}!</Text>
         </View>
 
-        <Image 
-          source={require('../assets/images/cantina.png')} 
-          style={styles.bannerImage} 
-        />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Status das Unidades</Text>
-          <View style={styles.occupancyContainer}>
-            {cantinasStatus.map(c => (
-              <View key={c.id} style={styles.occupancyWrapper}>
-                <OccupancyCard 
-                  nome={c.nome} 
-                  ocupacao={c.ocupacao} 
-                  tempoEspera={c.tempoEspera}
-                  statusDetalhado={c.statusDetalhado}
-                />
-              </View>
-            ))}
+        {/* 3. A Barra de Pesquisa Visual */}
+        <View style={styles.searchSection}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+            <TextInput 
+              style={styles.searchInput}
+              placeholder="Buscar salgados, bebidas..."
+              value={search}
+              onChangeText={setSearch}
+            />
+            {search.length > 0 && (
+              <TouchableOpacity onPress={() => setSearch('')}>
+                <Ionicons name="close-circle" size={20} color="#999" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {MENU_DATA.map((section, index) => (
-          <View key={index} style={styles.section}>
-            <Text style={styles.categoryTitle}>{section.title}</Text>
-            <FlatList
-              data={section.data}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => <ProductCard item={item} />}
-              contentContainerStyle={styles.horizontalList}
-            />
+        {/* 4. Oculta o banner e a ocupação se o usuário estiver pesquisando algo para limpar a tela */}
+        {search.length === 0 && (
+          <>
+            <Image source={require('../assets/images/cantina.png')} style={styles.bannerImage} />
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Status das Unidades</Text>
+              <View style={styles.occupancyContainer}>
+                {cantinasStatus.map(c => (
+                  <View key={c.id} style={styles.occupancyWrapper}>
+                    <OccupancyCard 
+                      nome={c.nome} 
+                      ocupacao={c.ocupacao} 
+                      tempoEspera={c.tempoEspera}
+                      statusDetalhado={c.statusDetalhado}
+                    />
+                  </View>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* 5. Renderiza os itens filtrados ou mensagem de "Nada encontrado" */}
+        {filteredMenu.length > 0 ? (
+          filteredMenu.map((section, index) => (
+            <View key={index} style={styles.section}>
+              <Text style={styles.categoryTitle}>{section.title}</Text>
+              <FlatList
+                data={section.data}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => <ProductCard item={item} />}
+                contentContainerStyle={styles.horizontalList}
+              />
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptySearch}>
+            <Ionicons name="fast-food-outline" size={50} color="#DDD" />
+            <Text style={styles.emptySearchText}>Nenhum produto encontrado.</Text>
           </View>
-        ))}
+        )}
         
       </ScrollView>
 
@@ -109,11 +148,20 @@ const styles = StyleSheet.create({
     height: 110, 
     justifyContent: 'flex-end', 
     paddingHorizontal: 20,
-    paddingBottom: 15,
+    paddingBottom: 25, // Aumentei o padding para a barra de pesquisa encaixar
   },
   headerTitle: { color: '#FFF', fontSize: 18, fontWeight: '800' },
   welcomeText: { color: '#FFF', fontSize: 14, opacity: 0.9 },
-  bannerImage: { width: '100%', height: 140, backgroundColor: '#DDD' },
+  
+  // Estilos da Barra de Pesquisa
+  searchSection: { paddingHorizontal: 15, marginTop: -20 },
+  searchContainer: { flexDirection: 'row', backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 15, height: 50, alignItems: 'center', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  searchIcon: { marginRight: 10 },
+  searchInput: { flex: 1, fontSize: 16, color: '#333' },
+  emptySearch: { alignItems: 'center', marginTop: 50 },
+  emptySearchText: { color: '#999', marginTop: 10, fontSize: 16 },
+
+  bannerImage: { width: '100%', height: 140, backgroundColor: '#DDD', marginTop: 15 },
   scrollContent: { paddingBottom: 100 },
   section: { marginTop: 25, paddingHorizontal: 15 },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: '#555', marginBottom: 15, textTransform: 'uppercase' },
