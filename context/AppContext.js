@@ -7,21 +7,23 @@ export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [registeredUsers, setRegisteredUsers] = useState([]); // Lista de usuários cadastrados
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [xp, setXp] = useState(0); // Estado de XP persistente
   const [loading, setLoading] = useState(true);
 
   // 1. CARREGAR DADOS AO INICIAR O APP
   useEffect(() => {
     const loadStorageData = async () => {
       try {
-        // Carrega usuários registrados, usuário logado e histórico de pedidos
         const storedRegistered = await AsyncStorage.getItem('@fiap_registered_users');
         const storedUser = await AsyncStorage.getItem('@fiap_user');
         const storedOrders = await AsyncStorage.getItem('@fiap_orders');
+        const storedXp = await AsyncStorage.getItem('@fiap_xp');
 
         if (storedRegistered) setRegisteredUsers(JSON.parse(storedRegistered));
         if (storedUser) setUser(JSON.parse(storedUser));
         if (storedOrders) setOrders(JSON.parse(storedOrders));
+        if (storedXp) setXp(parseInt(storedXp) || 0);
       } catch (e) {
         console.error("Erro ao carregar dados do storage", e);
       } finally {
@@ -35,12 +37,8 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const saveUser = async () => {
       try {
-        if (user) {
-          await AsyncStorage.setItem('@fiap_user', JSON.stringify(user));
-        } else {
-          // No logout, removemos apenas o usuário logado, não os cadastrados
-          await AsyncStorage.removeItem('@fiap_user');
-        }
+        if (user) await AsyncStorage.setItem('@fiap_user', JSON.stringify(user));
+        else await AsyncStorage.removeItem('@fiap_user');
       } catch (e) { console.error(e); }
     };
     saveUser();
@@ -49,18 +47,27 @@ export const AppProvider = ({ children }) => {
   // 3. SALVAR PEDIDOS AUTOMATICAMENTE
   useEffect(() => {
     const saveOrders = async () => {
-      try {
-        await AsyncStorage.setItem('@fiap_orders', JSON.stringify(orders));
-      } catch (e) { console.error(e); }
+      try { await AsyncStorage.setItem('@fiap_orders', JSON.stringify(orders)); } 
+      catch (e) { console.error(e); }
     };
     saveOrders();
   }, [orders]);
 
-  // --- FUNÇÕES DE AUTENTICAÇÃO ---
+  // 4. SALVAR XP AUTOMATICAMENTE
+  useEffect(() => {
+    const saveXp = async () => {
+      try { await AsyncStorage.setItem('@fiap_xp', xp.toString()); } 
+      catch (e) { console.error(e); }
+    };
+    saveXp();
+  }, [xp]);
 
+  // --- LÓGICA DE GAMIFICAÇÃO ---
+  const addXp = (amount) => setXp(prev => prev + Math.floor(amount * 10));
+
+  // --- FUNÇÕES DE AUTENTICAÇÃO ---
   const register = async (newUser) => {
     try {
-      // Verifica se o e-mail já existe
       const userExists = registeredUsers.find(u => u.email === newUser.email);
       if (userExists) return { success: false, message: 'Este e-mail já está cadastrado.' };
 
@@ -73,19 +80,11 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const login = (userData) => {
-    setUser(userData);
-  };
-
-  const logout = () => {
-    setUser(null);
-    setCart([]);
-  };
+  const login = (userData) => setUser(userData);
+  const logout = () => { setUser(null); setCart([]); };
 
   // --- FUNÇÕES DO CARRINHO ---
-
   const addToCart = (item) => setCart((prev) => [...prev, item]);
-
   const decreaseQuantity = (id) => {
     setCart((prev) => {
       const index = prev.findIndex(item => item.id === id);
@@ -97,19 +96,14 @@ export const AppProvider = ({ children }) => {
       return prev;
     });
   };
-
   const removeFromCart = (id) => setCart((prev) => prev.filter(item => item.id !== id));
-  
   const clearCart = () => setCart([]);
-
-  const addOrder = (newOrder) => {
-    setOrders((prev) => [newOrder, ...prev]);
-  };
+  const addOrder = (newOrder) => setOrders((prev) => [newOrder, ...prev]);
 
   return (
     <AppContext.Provider value={{ 
-      cart, user, orders, registeredUsers, loading,
-      login, logout, register, 
+      cart, user, orders, registeredUsers, loading, xp,
+      login, logout, register, addXp,
       addToCart, decreaseQuantity, removeFromCart, clearCart, addOrder 
     }}>
       {children}

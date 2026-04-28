@@ -7,8 +7,8 @@ import { AppContext } from '../context/AppContext';
 import TabBar from '../components/TabBar';
 
 export default function Cart() {
-  // Importamos a nova função addOrder
-  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, user, addOrder } = useContext(AppContext);
+  // Puxamos o xp do contexto aqui!
+  const { cart, addToCart, decreaseQuantity, removeFromCart, clearCart, user, addOrder, addXp, xp } = useContext(AppContext);
   const router = useRouter();
   const [selectedCantina, setSelectedCantina] = useState(null);
 
@@ -23,8 +23,13 @@ export default function Cart() {
   }, []);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+  
+  // NOVA LÓGICA DE DESCONTO
   const isProfessor = user?.perfil === 'professor';
-  const desconto = isProfessor ? subtotal * 0.1 : 0;
+  const isPlatina = xp >= 15000; // Acima de 15k é Platina
+  const temDesconto = isProfessor || isPlatina; 
+  
+  const desconto = temDesconto ? subtotal * 0.1 : 0;
   const total = subtotal - desconto;
 
   const handleCheckout = () => {
@@ -33,9 +38,8 @@ export default function Cart() {
       return;
     }
 
-    // Estruturação do objeto do pedido para o histórico
     const newOrder = {
-      id: Math.random().toString(36).substring(2, 9).toUpperCase(), // Gera um ID alfanumérico simples
+      id: Math.random().toString(36).substring(2, 9).toUpperCase(),
       date: new Date().toISOString(),
       items: groupedCart,
       subtotal: subtotal,
@@ -44,12 +48,12 @@ export default function Cart() {
       location: selectedCantina
     };
 
-    // Injeta o pedido no estado global ANTES de limpar o carrinho
     addOrder(newOrder);
+    addXp(total); 
     
     Alert.alert(
       'Pedido Confirmado!',
-      `Retirada na ${selectedCantina}\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+      `Retirada na ${selectedCantina}\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n+ ${Math.floor(total * 10)} XP Adquirido!`,
       [{ 
         text: 'OK', 
         onPress: () => { 
@@ -109,9 +113,10 @@ export default function Cart() {
               <Text>{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Text>
             </View>
 
-            {isProfessor && (
+            {/* MOSTRA O DESCONTO COM O NOME CORRETO */}
+            {temDesconto && (
               <View style={styles.priceRow}>
-                <Text style={styles.discountLabel}>Desconto Professor (10%):</Text>
+                <Text style={styles.discountLabel}>Desconto {isPlatina && !isProfessor ? 'Platina' : 'Professor'} (10%):</Text>
                 <Text style={styles.discountLabel}>-{desconto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Text>
               </View>
             )}
