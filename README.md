@@ -1,14 +1,12 @@
 # 🍔 Cantina FIAP - Refectory App (CP1)
 
+Aplicativo mobile desenvolvido em **React Native com Expo** para o gerenciamento de pedidos e filas nas cantinas da FIAP. Entregando uma experiência de usuário fluida e regras de negócio funcionais.
+
 ## 🎥 Demonstração
 
 <p align="center">
-  <img src="./assets/demo.gif" width="300"/>
+  <img src="./assets/gif-demonstracao.gif" width="300"/>
 </p>
-
-> *Adicione aqui um GIF curto mostrando o fluxo principal do app (login → pedido → confirmação).*
-
----
 
 ## 📱 Telas do Aplicativo
 
@@ -17,40 +15,40 @@
   <img src="./assets/screenshots/home.png" width="30%" />
   <img src="./assets/screenshots/menu.png" width="30%" />
 </p>
-
 <p align="center">
   <img src="./assets/screenshots/carrinho.png" width="30%" />
   <img src="./assets/screenshots/confirmacao.png" width="30%" />
   <img src="./assets/screenshots/perfil.png" width="30%" />
 </p>
 
----
-
 ## 🚀 Funcionalidades Implementadas
 
-- **Navegação Moderna:** Utilização do `Expo Router` com proteção de rotas (redirecionamento automático se o usuário não estiver logado).
-- **Gerenciamento de Estado Global:** Uso da `Context API` para manter os dados do usuário, carrinho e histórico sincronizados.
-- **Persistência de Dados:** Implementação do `Async Storage` para salvar sessão e histórico de compras.
-- **Regra de Negócio:** Aplicação automática de **10% de desconto** para usuários com perfil "Professor".
-- **UX/UI Interativa:**
-  - Simulação de ocupação em tempo real das cantinas
-  - Alertas nativos e Toasts
-  - Listas otimizadas com `FlatList`
-
----
+- **Navegação Moderna:** Utilização do `Expo Router` com proteção de rotas (Redirecionamento automático se o usuário não estiver logado).
+- **Gerenciamento de Estado Global:** Implementação da `Context API` para manter os dados do usuário, do carrinho e do histórico de pedidos sincronizados entre todas as telas.
+- **Persistência de Dados (Local Storage):** Uso do `@react-native-async-storage/async-storage` para salvar a sessão do usuário e o histórico de compras. O app mantém os dados mesmo após ser fechado.
+- **Regra de Negócio Dinâmica:** Cálculo automático de **10% de desconto** no checkout exclusivo para usuários com o perfil "Professor".
+- **UX/UI Interativa:** - Simulação de ocupação em tempo real das cantinas.
+  - Alertas nativos e Toasts para feedback de ações.
+  - Renderização otimizada de listas usando `FlatList`.
 
 ## 🛠️ Tecnologias Utilizadas
 
 - React Native (SDK 55)
 - Expo & Expo Router
-- Context API (useContext, useState, useEffect)
-- Async Storage
+- Context API (Hooks: useContext, useState, useEffect)
+- Async Storage (Persistência)
 - Expo Vector Icons (Ionicons)
-
----
 
 ## 💻 Como Executar o Projeto
 
-1. Clone o repositório:
-   ```bash
-   git clone <URL_DO_REPOSITORIO>
+1. Clone o repositório ou extraia os arquivos.
+2. Abra o terminal na pasta raiz do projeto.
+3. Instale as dependências executando:
+   npm install --legacy-peer-deps
+4. Inicie com: 
+  npx expo start -c
+
+## 👥 Integrantes
+
+* **Davi Xavier** - RM: 563572
+* **Gabriel Simioni** - RM: 563475
