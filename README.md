@@ -5,7 +5,7 @@ Aplicativo mobile desenvolvido em **React Native com Expo** para o gerenciamento
 ## 🎥 Demonstração
 
 <p align="center">
-  <img src="./assets/fiap-gif-demonstracao.gif" width="300"/>
+  <img src="./assets/gif-demonstracao.gif" width="300"/>
 </p>
 
 ## 📱 Telas do Aplicativo
