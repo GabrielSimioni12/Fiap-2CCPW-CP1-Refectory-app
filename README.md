@@ -1,4 +1,4 @@
-# 🍔 Cantina FIAP - Refectory App (CP1)
+# 🍔 Cantina FIAP - Refectory App (CP2)
 
 Aplicativo mobile desenvolvido em **React Native com Expo** para o gerenciamento de pedidos e filas nas cantinas da FIAP. Entregando uma experiência de usuário fluida e regras de negócio funcionais.
 
